@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Scroll con Cambio de Imágenes</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            height: 300vh; /* Altura extra para hacer scroll */
+            background: black;
+        }
+
+        .espaciador {
+            height: 100vh; /* Espacio antes de la sección de la imagen */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            font-size: 2rem;
+        }
+
+        .contenedor {
+            position: relative;
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: black;
+        }
+
+        .imagen {
+            max-width: 60%;
+            max-height: 80vh;
+            transition: opacity 0.5s ease-in-out;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="espaciador">Desliza hacia abajo</div>
+
+    <div class="contenedor" id="seccion-imagen">
+        <img id="imagen-scroll" class="imagen" src="../image/yopuk/yp1.png" alt="Imagen">
+    </div>
+
+    <div class="espaciador">Continúa bajando...</div>
+
+    <script>
+        let imagenes = [
+            "../image/yopuk/yp1.png",
+            "../image/yopuk/yp2.png",
+            "../image/yopuk/yp3.png",
+            "../image/yopuk/yp4.png"
+        ];
+
+        let indiceImagen = 0;
+        let imagenElement = document.getElementById("imagen-scroll");
+        let scrollBloqueado = false;
+
+        // Detectar cuando la sección entra en pantalla
+        let observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    scrollBloqueado = true;
+                    window.addEventListener("wheel", bloquearScroll, { passive: false });
+                    window.addEventListener("touchmove", bloquearScroll, { passive: false });
+                }
+            });
+        }, { threshold: 0.6 });
+
+        observer.observe(document.getElementById("seccion-imagen"));
+
+        // Función para bloquear el scroll y cambiar imágenes
+        function bloquearScroll(event) {
+            if (scrollBloqueado) {
+                event.preventDefault(); // Bloquea el scroll
+
+                if (event.deltaY > 0 && indiceImagen < imagenes.length - 1) { 
+                    // Scroll hacia abajo (siguiente imagen)
+                    indiceImagen++;
+                } else if (event.deltaY < 0 && indiceImagen > 0) { 
+                    // Scroll hacia arriba (imagen anterior)
+                    indiceImagen--;
+                } 
+                if (indiceImagen === imagenes.length - 1 || indiceImagen === 0) {
+                    scrollBloqueado = false;
+                    window.removeEventListener("wheel", bloquearScroll);
+                    window.removeEventListener("touchmove", bloquearScroll);
+                }
+
+                // Cambiar imagen con efecto
+                imagenElement.style.opacity = 0;
+                setTimeout(() => {
+                    imagenElement.src = imagenes[indiceImagen];
+                    imagenElement.style.opacity = 1;
+                }, 300);
+            }
+        }
+    </script>
+
+</body>
+</html>
